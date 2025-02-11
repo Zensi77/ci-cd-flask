@@ -10,7 +10,7 @@ class BasicTests(unittest.TestCase):
 
     def test_home(self):
         # Envía una solicitud GET a la ruta '/'
-        result = self.app.get('/prueba')
+        result = self.app.get('/test')
         
         # Verifica que la respuesta sea "Hello, World!"
         self.assertEqual(result.status_code, 200)
