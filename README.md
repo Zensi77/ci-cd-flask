@@ -1,54 +1,47 @@
-# ci-cd-flask
+# CI/CD Preproduction - Flask
 
-Este repositorio contiene los archivos necesarios para realizar una práctica de
-**introducción a CI/CD** para una aplicación [Flask][1].
+Este repositorio contiene un flujo de trabajo de CI/CD (Integración Continua/Despliegue Continuo) para una aplicación Flask, configurado con GitHub Actions. El objetivo es automatizar pruebas, construcción de imágenes Docker y despliegue en un entorno de preproducción.
 
-En esta práctica vamos a realizar las siguientes tareas.
+## Estructura del Workflow (`CI/CD Preproduction`)
 
-- **Intregración Continua (CI) con GitHub Actions**. Vamos a automatizar la ejecución de
-  tests unitarios cada vez que se haga un _push_ a la rama `main`.
-- **Entrega Continua (CD)**. Vamos a automatizar la creación y publicación de
-  una imagen Docker en Docker Hub cuando se pasen los test unitarios.
-- **Despliegue Continuo (CD)**. Vamos a automatizar el despliegue de la imagen
-  Docker en AWS.
+### Triggers
+- **Ejecución automática:** Al hacer `push` en la rama `main`.
+- **Ejecución manual:** Desde la pestaña `Actions` de GitHub (usando `workflow_dispatch`).
 
-## Cómo crear un virtualenv en Python
+### Variables de Entorno
+- `IMAGE_NAME`: Nombre de la imagen Docker (ejemplo: `ci-cd-python`).
 
-Creamos el entorno virtual.
+### Jobs
 
-```bash
-python3 -m venv venv
-```
+#### 1. **Test**
+   - **Objetivo:** Ejecutar pruebas automatizadas.
+   - **Pasos:**
+      - Configura Python 3.13.
+      - Instala dependencias del proyecto (`requirements.txt`).
+      - Ejecuta los tests con `unittest` (busca tests en la carpeta `tests`).
 
-Activamos el entorno virtual.
+#### 2. **Build-and-Push**
+   - **Dependencia:** Se ejecuta solo si el job `test` es exitoso.
+   - **Objetivo:** Construir y subir una imagen Docker a Docker Hub.
+   - **Pasos:**
+      - Login en Docker Hub usando credenciales almacenadas en [GitHub Secrets](https://docs.github.com/es/actions/security-guides/encrypted-secrets).
+      - Construye la imagen Docker con el formato: `<usuario-docker>/<IMAGE_NAME>:latest`.
+      - Sube la imagen al registry de Docker Hub.
 
-```bash
-source venv/bin/activate
-```
+## Configuración Requerida
+1. **Secrets en GitHub:**
+   - `DOCKER_HUB_USERNAME`: Nombre de usuario de Docker Hub.
+   - `DOCKER_HUB_TOKEN`: Token de acceso de Docker Hub (creado desde [Account Settings](https://hub.docker.com/settings/security)).
 
-Instalamos las dependencias.
+2. **Estructura del Proyecto:**
+   - Tests en la carpeta `tests`.
+   - `Dockerfile` configurado para la aplicación.
+   - `requirements.txt` con las dependencias de Python.
 
-```bash
-pip install -r requirements.txt
-```
-
-Para desactivar el entorno virtual.
-
-```bash
-deactivate
-```
-
-## Cómo ejecutar los tests
-
-Para realizar los tests vamos a utilizar `unittest`, que es el framework de
-pruebas unitarias que viene integrado en Python.
-
-Desde la raíz del proyecto, ejecutamos el siguiente comando.
-
-```bash
-python3 -m unittest tests/*.py
-```
-
-Este comando ejecutará todos los tests que se encuentren en la carpeta `tests`.
-
-[1]: https://flask.palletsprojects.com/en/stable/
+## Flujo del Proceso
+```mermaid
+graph LR
+    A[Push en main] --> B(Ejecutar Tests)
+    B --> C{Tests exitosos?}
+    C -->|Sí| D[Construir y Subir Imagen]
+    C -->|No| E[Fin con error]
