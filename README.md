@@ -45,3 +45,7 @@ graph LR
     B --> C{Tests exitosos?}
     C -->|Sí| D[Construir y Subir Imagen]
     C -->|No| E[Fin con error]
+```
+
+## Resultado del Workflow al hacer `push` en `main`
+![CI/CD Pipeline](./imgs/image.png)
